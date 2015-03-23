@@ -19,6 +19,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
+ * 散列算法一般用于生成数据的摘要信息，是一种不可逆的算法（MD5、SHA）
  * <p>User: Zhang Kaitao
  * <p>Date: 14-1-27
  * <p>Version: 1.0
@@ -36,6 +37,9 @@ public class CodecAndCryptoTest {
 
     }
 
+    /**
+     * 16进制字符串编码/解码操作
+     */
     @Test
     public void testHex() {
         String str = "hello";
@@ -45,6 +49,9 @@ public class CodecAndCryptoTest {
 
     }
 
+    /**
+     * CodecSupport类提供了toBytes/toString方法用于byte数组/String之间转换
+     */
     @Test
     public void testCodecSupport() {
         String str = "hello";
@@ -71,7 +78,8 @@ public class CodecAndCryptoTest {
         String md5 = new Md5Hash(str, salt).toString();//还可以转换为 toBase64()/toHex()
         System.out.println(md5);
 
-
+        String _md5 = new Md5Hash(str, salt, 2).toString();//还可以转换为 toBase64()/toHex()
+        System.out.println(_md5);
     }
 
     @Test
@@ -121,24 +129,32 @@ public class CodecAndCryptoTest {
     }
 
 
-
+    /**
+     * shiro提供的加密接口实现 DefaultHashService
+     */
     @Test
     public void testHashService() {
         DefaultHashService hashService = new DefaultHashService(); //默认算法SHA-512
         hashService.setHashAlgorithmName("SHA-512");
         hashService.setPrivateSalt(new SimpleByteSource("123")); //私盐，默认无
-        hashService.setGeneratePublicSalt(true);//是否生成公盐，默认false
+        hashService.setGeneratePublicSalt(true);//在用户没有传入公盐的情况下是否生成公盐，默认false
         hashService.setRandomNumberGenerator(new SecureRandomNumberGenerator());//用于生成公盐。默认就这个
         hashService.setHashIterations(1); //生成Hash值的迭代次数
 
         HashRequest request = new HashRequest.Builder()
-                .setAlgorithmName("MD5").setSource(ByteSource.Util.bytes("hello"))
-                .setSalt(ByteSource.Util.bytes("123")).setIterations(2).build();
+                .setAlgorithmName("MD5") // 算法
+                .setSource(ByteSource.Util.bytes("hello")) // 数据
+                .setSalt(ByteSource.Util.bytes("123")) // 公盐
+                .setIterations(2) // 迭代次数
+                .build();
         String hex = hashService.computeHash(request).toHex();
         System.out.println(hex);
     }
 
 
+    /**
+     * 对称式加密/解密算法，如AES、Blowfish等，当前还没有提供对非对称加密/解密算法支持，未来版本可能提供  
+     */
     @Test
     public void testAesCipherService() {
         AesCipherService aesCipherService = new AesCipherService();
@@ -146,14 +162,15 @@ public class CodecAndCryptoTest {
 
         //生成key
         Key key = aesCipherService.generateNewKey();
-
+        
         String text = "hello";
 
         //加密
         String encrptText = aesCipherService.encrypt(text.getBytes(), key.getEncoded()).toHex();
         //解密
         String text2 = new String(aesCipherService.decrypt(Hex.decode(encrptText), key.getEncoded()).getBytes());
-
+        System.out.println("encrptText:"+encrptText+"("+encrptText.length()+")");
+        System.out.println("decryptText:"+text2);
         Assert.assertEquals(text, text2);
     }
 
@@ -171,7 +188,8 @@ public class CodecAndCryptoTest {
         String encrptText = blowfishCipherService.encrypt(text.getBytes(), key.getEncoded()).toHex();
         //解密
         String text2 = new String(blowfishCipherService.decrypt(Hex.decode(encrptText), key.getEncoded()).getBytes());
-
+        System.out.println("encrptText:"+encrptText+"("+encrptText.length()+")");
+        System.out.println("decryptText:"+text2);
         Assert.assertEquals(text, text2);
     }
 
@@ -192,7 +210,8 @@ public class CodecAndCryptoTest {
         String encrptText = cipherService.encrypt(text.getBytes(), key.getEncoded()).toHex();
         //解密
         String text2 = new String(cipherService.decrypt(Hex.decode(encrptText), key.getEncoded()).getBytes());
-
+        System.out.println("encrptText:"+encrptText+"("+encrptText.length()+")");
+        System.out.println("decryptText:"+text2);
         Assert.assertEquals(text, text2);
     }
 

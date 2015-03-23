@@ -9,6 +9,7 @@ import org.apache.shiro.authc.pam.AuthenticationStrategy;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
